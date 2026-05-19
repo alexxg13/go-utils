@@ -60,11 +60,15 @@ func NewLogger(env string) (Logger, error) {
 	if env == "debug" {
 		level = zap.DebugLevel
 	}
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		zapcore.AddSync(logFile),
-		level,
-	)
+
+	fileEncoder := zapcore.NewJSONEncoder(encoderConfig)
+	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
+	fileWriter := zapcore.AddSync(logFile)
+	consoleWriter := zapcore.AddSync(os.Stdout)
+	fileCore := zapcore.NewCore(fileEncoder, fileWriter, level)
+	consoleCore := zapcore.NewCore(consoleEncoder, consoleWriter, level)
+
+	core := zapcore.NewTee(fileCore, consoleCore)
 
 	logger := zap.New(
 		core,
