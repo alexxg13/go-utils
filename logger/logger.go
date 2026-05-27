@@ -160,6 +160,13 @@ func (l *L) Fatal(ctx context.Context, msg string, fields ...zap.Field) {
 	l.z.Fatal(msg, fields...)
 }
 
+func (l *L) Warn(ctx context.Context, msg string, fields ...zap.Field) {
+	fields = TryAppendRequestID(ctx, fields)
+	fields = TryAppendTraceID(ctx, fields)
+
+	l.z.Warn(msg, fields...)
+}
+
 func (l *L) Sync() error {
 	return l.z.Sync()
 }
